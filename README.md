@@ -68,6 +68,6 @@ Then, we will write a kernel code, `kernel.cpp`... **without standard libraries!
 
 Afterwards, we will write linker file so that the image file will be read by the bootloader start execution at the symbol designated as the entry point.
 
-Lastly, all of these files should be compiled and linked together to form one kernel binary, which then should be put in the `iso` directory and generate the image file with `grub-mkrescue`.
+Lastly, all of these files need to be compiled and linked together to form one kernel binary, which then should be put in the `iso` directory and generate the image file with `grub-mkrescue`.
 
 `WIP`
