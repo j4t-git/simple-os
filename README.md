@@ -294,29 +294,29 @@ You may wonder: "What are these flags for??? What do they do?"
 We'll go step by step:
 
 `nasm`:
-    - `-f` means: filename
-    - `elf`: produce linux output file
-    - `-o`: specify output filename
+- `-f` means: filename
+- `elf`: produce linux output file
+- `-o`: specify output filename
 
 Now come the lengthy ones for g++ and i386-linux-gcc:
 
 `g++`:
-    - `-Wall`: Enable all compiler warnings
-    - `-Wpedantic`: Issue all the warnings demanded by strict ISO C and ISO C++
-    - `-fanalyzer`: This option enables an static analysis of program flow which looks for “interesting” interprocedural paths through the code, and issues warnings for problems found on them
-    - `-c`: Compile or assemble without linking
-    - `-ffreestanding`: Target a freestanding environment, where standard library may not exist
-    - `-fno-exceptions`: Disable exception handling
-    - `-fno-rtti`: No runtime type information
-    - `-march=i386`: Generate instructions for the machine type `i386`
-    - `-m32`: Set int, long, and pointer types to 32 bits, and generates code that runs in 32-bit mode
+- `-Wall`: Enable all compiler warnings
+- `-Wpedantic`: Issue all the warnings demanded by strict ISO C and ISO C++
+- `-fanalyzer`: This option enables an static analysis of program flow which looks for “interesting” interprocedural paths through the code, and issues warnings for problems found on them
+- `-c`: Compile or assemble without linking
+- `-ffreestanding`: Target a freestanding environment, where standard library may not exist
+- `-fno-exceptions`: Disable exception handling
+- `-fno-rtti`: No runtime type information
+- `-march=i386`: Generate instructions for the machine type `i386`
+- `-m32`: Set int, long, and pointer types to 32 bits, and generates code that runs in 32-bit mode
 
 `i386-linux-gcc`:
-    - `-T`: Use script as the linker script.
-    - `-nostdlib`: Do not use standard libraries
-    - `-nodefaultlibs`: Same as above
-    - `-lgcc`: Do not use internal GCC subroutines
-    - `-z noexecstack`: Do not use executable stack
+- `-T`: Use script as the linker script.
+- `-nostdlib`: Do not use standard libraries
+- `-nodefaultlibs`: Same as above
+- `-lgcc`: Do not use internal GCC subroutines
+- `-z noexecstack`: Do not use executable stack
 
 Whoops, that's a lot of flags to explain! We finally should have the output, `kern`.
 
