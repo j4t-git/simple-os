@@ -4,7 +4,7 @@
 
 This repository serves as well the guide to setting your beginner footsteps into the world of making OS and OS-related stuff. Don't be scared, for because outputting the text and changing the colors isn't that difficult!
 
-You can use makefile to generate the image file that you can load in any virtual machine that supports it.
+You can use the included makefile to generate the image file that you can load in any virtual machine that supports it.
 
 Or maybe you want to do it yourself? No problem! The following parts will be about writing the necessary stuff to compile and then create an image file to load.
 
@@ -68,7 +68,7 @@ Then, we will write a kernel code, `kernel.cpp`... **without standard libraries!
 
 Afterwards, we will write linker file so that the image file will be read by the bootloader and start execution at the symbol designated as the entry point.
 
-Lastly, all of these files need to be compiled and linked together to form one kernel binary, which then should be put in the `iso` directory and generate the image file with `grub-mkrescue`.
+Lastly, all of these files need to be compiled and linked together to form one kernel binary, which then should be put in the `iso` directory, containing boot and grub directories, and generate the image file with `grub-mkrescue`.
 
 Technically we could write a 1 sector (512 bytes) bootloader in Assembly entirely, but for the sake of simplicity, we'll use `grub2`. 
 
@@ -120,6 +120,8 @@ Here's what's going on:
 - Export the symbol `start`
 - in `start`, push `ebx` (pushes the 32-bit register `ebx` to the stack) and call the function `_kernel_main` while passing the pointer to a multiboot header as well.
 
+## Step 2
+
 Now, let's write the kernel code like this:
 
 ```c++
@@ -133,7 +135,7 @@ struct vga {
   size_t term_row;
   size_t term_column;
   uint8_t term_color;
-  uint16_t *term_buf;
+  volatile uint16_t *term_buf;
 };
 vga vgaobj;
 
@@ -180,7 +182,7 @@ void term_init() {
   vgaobj.term_row = 0;
   vgaobj.term_column = 0;
   vgaobj.term_color = make_color(TEXT_COLOR_WHITE, COLOR_BLUE);
-  vgaobj.term_buf = (uint16_t *)0xB8000;
+  vgaobj.term_buf = (volatile uint16_t *)0xB8000;
   for (size_t y = 0; y < vgaobj.VGA_HEIGHT; y++) {
     for (size_t x = 0; x < vgaobj.VGA_WIDTH; x++) {
       const size_t index = y * vgaobj.VGA_WIDTH + x;
@@ -188,7 +190,7 @@ void term_init() {
     }
   }
 }
-
+/* In case the user wants to change color */
 inline void term_setcolor(uint8_t color) { vgaobj.term_color = color; }
 
 void term_putentry(uint8_t c, uint8_t color, size_t x, size_t y) {
@@ -227,9 +229,126 @@ What the code does:
 - Include two headers we've mentioned above
 - Create a structure called `vga`, which contains information about sizes, rows and columns as well color and buffer. We declare the variable afterwards so that we can access it at all times.
 - We create an enum of VGA colors. **Note** that first 8 colors are for the background, while the remaining 8 are for the foreground (text in this case)
-- `make_color`: Set colors with bitwise shift to left by 4
-- `vga_entry`: Bitwise shift character and color to left by 8
+- `make_color`: Set colors with bitwise shift to left by 4, calculate the value of the attribute bytes
+- `vga_entry`: Bitwise shift character and color to left by 8, calculate the value of the attribute bytes
 - `strlen`: Count and return the length of the string that is passed by `term_writestr`
-- `term_init`: Initalize the VGA terminal variables. **Note** that the number `0xB8000`is the physical memory address for VGA text buffer.
+- `term_init`: Initalize the VGA terminal variables. **Note** that the number `0xB8000`is the physical memory address for VGA text buffer. See the VGA text mode link above.
+- `term_init`: Further, fill the entire screen with the terminal color
+- `term_setcolor`: Set new color
+- `term_putentry`: Put the character and the color associated with it in the terminal
+- `term_putchar`: Call `term_putentry`, do checks
+- `term_writestr`: Call strlen, loop for each character in the string. During the loop, call `term_putchar` with the current index in a string
+- `_kernel_main`: Call to initalize terminal and write string, then loop forever
 
-`WIP`
+As you might have noticed, the main function needs to be same name as in `boot.asm` as well, otherwise you'll get undefined reference errors.
+
+## Step 3
+
+Now, the linker part:
+
+```txt
+ENTRY(start)
+
+SECTIONS
+{
+    /* 1 MIB */
+    . = 1M;
+
+    .text BLOCK(4K) : ALIGN(4K)
+    {
+        *(.mbHeader)
+        *(.text)
+    }
+    .rodata BLOCK(4K) : ALIGN(4K)
+    {
+        *(.rodata)
+    }
+
+    .data BLOCK(4K) : ALIGN(4K)
+    {
+        *(.data)
+    }
+    .bss BLOCK(4K) : ALIGN(4K)
+    {
+        *(.bss)
+    }
+}
+```
+
+`ENTRY(start)` is our entry point symbol. `SECTIONS` is basically a "picture" of how it should look like, the output file's layout. The sections are put at 1 MiB, which is a conventional place for kernels to be loaded at by the bootloader. The multiboot header needs to be placed first so it can be recognized by the GRUB bootloader. The rest are as it follows: code segment, read-only data, initalized read-write data, (uninitalized) read-write data and stack.
+
+## Step 4
+
+Now that we have them all, let's build the kernel, the core of the OS!
+
+These are the instructions that you have to follow:
+
+```bash
+nasm -f elf boot.asm -o boot.o
+g++ -Wall -Wpedantic -fanalyzer -c kernel.cpp -o kernel.o -ffreestanding -fno-exceptions -fno-rtti -march=i386 -m32
+i386-linux-gcc boot.o kernel.o -T linker.ld -o kern -nostdlib -nodefaultlibs -lgcc -z noexecstack
+```
+
+You may wonder: "What are these flags for??? What do they do?"
+
+We'll go step by step:
+
+`nasm`:
+    - `-f` means: filename
+    - `elf`: produce linux output file
+    - `-o`: specify output filename
+
+Now come the lengthy ones for g++ and i386-linux-gcc:
+
+`g++`:
+    - `-Wall`: Enable all compiler warnings
+    - `-Wpedantic`: Issue all the warnings demanded by strict ISO C and ISO C++
+    - `-fanalyzer`: This option enables an static analysis of program flow which looks for “interesting” interprocedural paths through the code, and issues warnings for problems found on them
+    - `-c`: Compile or assemble without linking
+    - `-ffreestanding`: Target a freestanding environment, where standard library may not exist
+    - `-fno-exceptions`: Disable exception handling
+    - `-fno-rtti`: No runtime type information
+    - `-march=i386`: Generate instructions for the machine type `i386`
+    - `-m32`: Set int, long, and pointer types to 32 bits, and generates code that runs in 32-bit mode
+
+`i386-linux-gcc`:
+    - `-T`: Use script as the linker script.
+    - `-nostdlib`: Do not use standard libraries
+    - `-nodefaultlibs`: Same as above
+    - `-lgcc`: Do not use internal GCC subroutines
+    - `-z noexecstack`: Do not use executable stack
+
+Whoops, that's a lot of flags to explain! We finally should have the output, `kern`.
+
+We put the kernel in the `iso/boot/`, create another directory inside: `grub`, where we'll write a simple `grub.cfg`:
+
+```cfg
+menuentry "os"
+{
+multiboot /boot/kern
+}
+```
+
+Don't forget to change name, the /boot/**kern**, in any case if you ever output kernel with a different name such as "simpleos", otherwise you won't get intended results.
+You can change menuentry name as well.
+
+Once done, this is what the structure should look like:
+
+```txt
+iso/
+├─ boot/
+│  ├─ kern
+│  ├─ grub/
+│  │  ├─ grub.cfg
+```
+
+Now, go back and finally, you get to use `grub-mkrescue iso --output=kern.iso`.
+You then should have a ready image file that is approximately 5 MB in size.
+
+Load it in the virtual machine, don't panic if there is GRUB console. Just type `boot`!
+
+Bam, you have made it that far and wrote a pretty basic OS so you can write some text!
+
+But remember, the actual long, complex and hard stuff comes when you start going beyond just text and colors, since you'll have to deal with way many things such as managing memory.
+
+Otherwise, happy coding! I hope this guide has helped you in setting your first foots in OS/kernel development!
