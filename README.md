@@ -221,4 +221,15 @@ extern "C" void _kernel_main() {
 }
 ```
 
+See, we have to create the stuff by ourselves entirely without the standard libraries.
+
+What the code does:
+- Include two headers we've mentioned above
+- Create a structure called `vga`, which contains information about sizes, rows and columns as well color and buffer. We declare the variable afterwards so that we can access it at all times.
+- We create an enum of VGA colors. **Note** that first 8 colors are for the background, while the remaining 8 are for the foreground (text in this case)
+- `make_color`: Set colors with bitwise shift to left by 4
+- `vga_entry`: Bitwise shift character and color to left by 8
+- `strlen`: Count and return the length of the string that is passed by `term_writestr`
+- `term_init`: Initalize the VGA terminal variables. **Note** that the number `0xB8000`is the physical memory address for VGA text buffer.
+
 `WIP`
