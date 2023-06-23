@@ -11,7 +11,7 @@ Or maybe you want to do it yourself? No problem! The following parts will be abo
 ## Notes
 
 - This is intended to be the improvement upon the older guides that allowed it to happen.
-- The code is entirely 32-bit, so no -x86-64!
+- The kernel is entirely 32-bit, so no -x86-64!
 
 ## Requirements and Dependencies
 
@@ -66,7 +66,7 @@ We will use Assembly to create a boot file, set architecture to 32 bit and multi
 
 Then, we will write a kernel code, `kernel.cpp`... **without standard libraries!** What does that mean!? There's a good reason: These libraries are meant for user mode, not kernel mode. As well, we will not be able to use library subroutines either. But hey, we still have portable headers that we can use, such as `<stdint.h>` and `<stddef.h>` that will be included in the code.
 
-Afterwards, we will write linker file so that the image file will be read by the bootloader start execution at the symbol designated as the entry point.
+Afterwards, we will write linker file so that the image file will be read by the bootloader and start execution at the symbol designated as the entry point.
 
 Lastly, all of these files need to be compiled and linked together to form one kernel binary, which then should be put in the `iso` directory and generate the image file with `grub-mkrescue`.
 
