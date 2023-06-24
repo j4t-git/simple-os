@@ -5,6 +5,7 @@
 This repository serves as well the guide to setting your beginner footsteps into the world of making OS and OS-related stuff. Don't be scared, for because outputting the text and changing the colors isn't that difficult!
 
 You can use the included makefile to generate the image file that you can load in any virtual machine that supports it.
+Just do `git clone https://github.com/BuranCodes/simple-os`
 
 Or maybe you want to do it yourself? No problem! The following parts will be about writing the necessary stuff to compile and then create an image file to load.
 
@@ -64,7 +65,7 @@ In this repo, we will deal exclusively with Assembly and C++ as well the linker 
 
 We will use Assembly to create a boot file, set architecture to 32 bit and multiboot header as well call the kernel.
 
-Then, we will write a kernel code, `kernel.cpp`... **without standard libraries!** What does that mean!? There's a good reason: These libraries are meant for user mode, not kernel mode. As well, we will not be able to use library subroutines either. But hey, we have portable headers that we can use, such as `<stdint.h>` and `<stddef.h>` that will be included in the code.
+Then, we will write a kernel code, `kernel.cpp`... **without standard libraries!** What does that mean!? <a href="https://stackoverflow.com/questions/13485271/why-cant-we-use-c-standard-library-functions-in-kernel-development">There's a good reason</a>: These libraries are meant for user mode, not kernel mode. As well, we will not be able to use library subroutines either. But hey, we have <a href="https://wiki.osdev.org/C_Library#Freestanding_and_Hosted">portable headers</a> that we can use, such as `<stdint.h>` and `<stddef.h>` that will be included in the code.
 
 Afterwards, we will write linker file so that the image file will be read by the bootloader and start execution at the symbol designated as the entry point.
 
@@ -352,3 +353,15 @@ Bam, you have made it that far and wrote a pretty basic OS so you can write some
 But remember, the actual long, complex and hard stuff comes when you start going beyond just text and colors, since you'll have to deal with way many things such as managing memory.
 
 Otherwise, happy coding! I hope this guide has helped you in setting your first foots in OS/kernel development!
+
+## **Contributing**
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement". Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch `(git checkout -b feature/epicfeature)`
+3. Commit your Changes `(git commit -m 'Add some epic feature')`
+4. Push to the Branch `(git push origin feature/epicfeature)`
+5. Open a Pull Request
