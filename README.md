@@ -13,6 +13,7 @@ Or maybe you want to do it yourself? No problem! The following parts will be abo
 
 - This is intended to be the improvement upon the older guides that allowed it to happen.
 - The kernel is entirely 32-bit, so no -x86-64!
+- This guide relies on VGA text mode and legacy BIOS stuff which is outdated nowadays. If you want to go above that, consider using <a href="https://wiki.osdev.org/UEFI">UEFI</a> and <a href="https://wiki.osdev.org/GOP">GOP</a> (Graphics Output Protocol). We will go with the basics first.
 
 ## Requirements and Dependencies
 
