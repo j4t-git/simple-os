@@ -133,7 +133,7 @@ Now, let's write the kernel code like this:
 
 struct vga {
   static const size_t VGA_WIDTH = 80;
-  static const size_t VGA_HEIGHT = 24;
+  static const size_t VGA_HEIGHT = 25;
   size_t term_row;
   size_t term_column;
   uint8_t term_color;
@@ -151,15 +151,15 @@ enum vga_color {
   COLOR_RED,
   COLOR_MAGENTA,
   COLOR_BROWN,
-  TEXT_COLOR_LIGHT_GREY,
-  TEXT_COLOR_DARK_GREY,
-  TEXT_COLOR_LIGHT_BLUE,
-  TEXT_COLOR_LIGHT_GREEN,
-  TEXT_COLOR_LIGHT_CYAN,
-  TEXT_COLOR_LIGHT_RED,
-  TEXT_COLOR_LIGHT_MAGENTA,
-  TEXT_COLOR_LIGHT_BROWN,
-  TEXT_COLOR_WHITE
+  COLOR_LIGHT_GREY,
+  COLOR_DARK_GREY,
+  COLOR_LIGHT_BLUE,
+  COLOR_LIGHT_GREEN,
+  COLOR_LIGHT_CYAN,
+  COLOR_LIGHT_RED,
+  COLOR_LIGHT_MAGENTA,
+  COLOR_LIGHT_BROWN,
+  COLOR_WHITE
 };
 
 uint8_t make_color(enum vga_color fg, enum vga_color bg) {
@@ -183,7 +183,7 @@ size_t strlen(const char *str) {
 void term_init() {
   vgaobj.term_row = 0;
   vgaobj.term_column = 0;
-  vgaobj.term_color = make_color(TEXT_COLOR_WHITE, COLOR_BLUE);
+  vgaobj.term_color = make_color(COLOR_WHITE, COLOR_BLUE);
   vgaobj.term_buf = (volatile uint16_t *)0xB8000;
   for (size_t y = 0; y < vgaobj.VGA_HEIGHT; y++) {
     for (size_t x = 0; x < vgaobj.VGA_WIDTH; x++) {
