@@ -19,5 +19,4 @@ MULTIBOOTHEADER:
 
 global start ; START OPERATING SYSTEM
 start:
-push ebx
 call _kernel_main
